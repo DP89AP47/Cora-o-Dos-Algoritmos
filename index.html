@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>Coração dos Algoritmos - Jogo Educativo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #6dd5fa, #2980b9);
+    font-family: 'Press Start 2P', cursive;
+    color: #222;
+    user-select: none;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+  #game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #e0f7fa;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(70,155,170,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 1.5rem;
+    color: #005662;
+    margin-top: 15px;
+    text-align: center;
+    user-select: none;
+  }
+  #life-bar-container {
+    width: 90%;
+    background: #ccc;
+    border-radius: 14px;
+    height: 30px;
+    overflow: hidden;
+    margin: 15px 0 25px 0;
+    user-select: none;
+    position: relative;
+  }
+  #life-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #24c6dc, #514a9d);
+    transition: width 0.5s ease;
+    position: relative;
+    z-index: 2;
+  }
+  #life-bar-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.3);
+    z-index: 1;
+    opacity: 0;
+  }
+  #heart-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23d50000"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center center / contain;
+    filter: drop-shadow(0 0 5px #d50000);
+    animation: heartbeat 1.5s infinite;
+  }
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.1); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  #buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  .algo-btn {
+    background: #00796b;
+    color: #e0f2f1;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    padding: 16px 20px;
+    cursor: pointer;
+    flex: 1 1 45%;
+    max-width: 180px;
+    transition: all 0.3s ease;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .algo-btn:hover:not(:disabled) {
+    background: #004d40;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  .algo-btn:disabled {
+    background: #999;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  .algo-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .algo-btn:hover::after {
+    transform: translateX(0);
+  }
+  #info-panel {
+    background: #004d40;
+    color: #a7ffeb;
+    font-size: 0.7rem;
+    padding: 15px;
+    border-radius: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+    width: 95%;
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+    user-select: text;
+    font-family: monospace;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+  }
+  #info-panel.highlight {
+    animation: highlight 0.5s;
+  }
+  @keyframes highlight {
+    0% { background-color: #004d40; }
+    50% { background-color: #00796b; }
+    100% { background-color: #004d40; }
+  }
+  #score-panel {
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    color:#00332b;
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+  }
+  #level-indicator {
+    background: #00796b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+  }
+  #message-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    color: #f8f9fa;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    border-radius: 12px;
+    z-index: 999;
+    user-select: none;
+    text-align: center;
+    line-height: 1.8;
+  }
+  #message-screen button {
+    margin-top: 25px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+    background: #00796b;
+    border: none;
+    padding: 12px 24px;
+    color: #a7ffeb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  #message-screen button:hover {
+    background: #004d40;
+    transform: scale(1.05);
+  }
+  /* Telas iniciais */
+  #start-screen, #inside-hospital-screen, #tutorial-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 0;
+    gap: 20px;
+  }
+  #start-screen {
+    background-color: #000;
+  }
+  #inside-hospital-screen {
+    display: none;
+    background-color: #121212;
+  }
+  #tutorial-screen {
+    display: none;
+    background-color: #121212;
+  }
+  #start-screen img#start-hospital-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.7;
+  }
+  #inside-hospital-screen img#hospital-inside-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.7;
+  }
+  #tutorial-screen img#tutorial-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0.7;
+  }
+  #start-screen h1, #inside-hospital-screen h1, #tutorial-screen h1 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    text-shadow: 3px 3px 8px #000;
+    margin: 0;
+    text-align: center;
+    padding: 0 20px;
+    z-index: 10;
+  }
+  #tutorial-screen .tutorial-content {
+    background: rgba(0, 77, 64, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 800px;
+    margin: 0 20px;
+    z-index: 10;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  #tutorial-screen .tutorial-content h2 {
+    color: #a7ffeb;
+    font-size: 1.5rem;
+    margin-top: 0;
+  }
+  #tutorial-screen .tutorial-content p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+  #tutorial-screen .tutorial-content ul {
+    text-align: left;
+    margin-left: 20px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  #btn-start, #btn-enter-hospital, #btn-start-tutorial {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.5rem;
+    background: #00cc66;
+    border: none;
+    padding: 20px 50px;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 0 20px #00cc66;
+    transition: all 0.3s ease;
+    z-index: 10;
+    position: relative;
+    overflow: hidden;
+  }
+  #btn-start:hover, #btn-enter-hospital:hover, #btn-start-tutorial:hover {
+    background: #009944;
+    transform: scale(1.05);
+  }
+  #btn-start::after, #btn-enter-hospital::after, #btn-start-tutorial::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+  }
+  #btn-start:hover::after, #btn-enter-hospital:hover::after, #btn-start-tutorial:hover::after {
+    left: 100%;
+  }
+  /* Botão voltar */
+  .btn-voltar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+    background: #555555cc;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 15px;
+    color: white;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.3s ease;
+  }
+  .btn-voltar:hover {
+    background: #333333cc;
+    transform: scale(1.05);
+  }
+  /* Efeitos de partícula */
+  .particle {
+    position: absolute;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+  }
+  /* Tooltip */
+  .tooltip {
+    position: absolute;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    max-width: 250px;
+    text-align: center;
+  }
+  /* Modal de tutorial */
+  .tutorial-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #004d40;
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    z-index: 1001;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    display: none;
+  }
+  .tutorial-modal h2 {
+    color: #a7ffeb;
+    font-size: 1.2rem;
+    margin-top: 0;
+  }
+  .tutorial-modal p {
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  .tutorial-modal button {
+    background: #00796b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+  }
+  /* Responsivo */
+  @media(max-width: 768px) {
+    #game-container {
+      padding: 15px;
+    }
+    h1 {
+      font-size: 1.2rem;
+    }
+    .algo-btn {
+      font-size: 0.7rem;
+      max-width: 150px;
+      padding: 14px;
+    }
+    #info-panel {
+      font-size: 0.65rem;
+      max-height: 120px;
+    }
+    #start-screen h1, #inside-hospital-screen h1, #tutorial-screen h1 {
+      font-size: 1.8rem;
+    }
+    #btn-start, #btn-enter-hospital, #btn-start-tutorial {
+      font-size: 1.2rem;
+      padding: 15px 35px;
+    }
+    .btn-voltar {
+      font-size: 0.8rem;
+      padding: 8px 15px;
+    }
+    #tutorial-screen .tutorial-content {
+      padding: 15px;
+    }
+    #tutorial-screen .tutorial-content h2 {
+      font-size: 1.2rem;
+    }
+    #tutorial-screen .tutorial-content p {
+      font-size: 0.8rem;
+    }
+    #tutorial-screen .tutorial-content ul {
+      font-size: 0.8rem;
+    }
+  }
+  @media(max-width: 480px) {
+    #game-container {
+      padding: 10px;
+    }
+    h1 {
+      font-size: 1rem;
+    }
+    .algo-btn {
+      font-size: 0.6rem;
+      max-width: 120px;
+      padding: 12px;
+    }
+    #info-panel {
+      font-size: 0.6rem;
+      max-height: 100px;
+    }
+    #start-screen h1, #inside-hospital-screen h1, #tutorial-screen h1 {
+      font-size: 1.5rem;
+    }
+    #btn-start, #btn-enter-hospital, #btn-start-tutorial {
+      font-size: 1rem;
+      padding: 12px 30px;
+    }
+    .btn-voltar {
+      font-size: 0.7rem;
+      padding: 6px 12px;
+    }
+    #score-panel {
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    #tutorial-screen .tutorial-content {
+      padding: 10px;
+      max-height: 60vh;
+    }
+    #tutorial-screen .tutorial-content h2 {
+      font-size: 1rem;
+    }
+    #tutorial-screen .tutorial-content p {
+      font-size: 0.7rem;
+    }
+    #tutorial-screen .tutorial-content ul {
+      font-size: 0.7rem;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="game-container" role="main" aria-label="Jogo Coração dos Algoritmos">
+
+  <!-- Tela Inicial -->
+  <div id="start-screen" role="dialog" aria-modal="true" aria-label="Tela inicial do jogo">
+    <img id="start-hospital-img" src="https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Hospital"/>
+    <h1>Bem-vindo ao Coração dos Algoritmos</h1>
+    <button id="btn-start" aria-label="Iniciar o jogo" type="button">START GAME</button>
+  </div>
+
+  <!-- Tela de Tutorial -->
+  <div id="tutorial-screen" role="dialog" aria-modal="true" aria-label="Tela de tutorial do jogo">
+    <img id="tutorial-img" src="https://images.pexels.com/photos/668298/pexels-photo-668298.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Interior do hospital"/>
+    <button class="btn-voltar" id="btn-voltar-to-start" type="button" aria-label="Voltar para tela inicial">← Voltar</button>
+    <div class="tutorial-content">
+      <h2>Como Jogar</h2>
+      <p>Você é um médico especialista em algoritmos! Seu paciente está com o coração desordenado e precisa de sua ajuda.</p>
+      
+      <h3>Objetivo do Jogo</h3>
+      <p>Use os algoritmos de ordenação para normalizar os batimentos cardíacos do paciente.</p>
+      
+      <h3>Como Jogar</h3>
+      <ul>
+        <li>Você verá uma lista de números representando os batimentos cardíacos</li>
+        <li>Escolha um algoritmo de ordenação para organizar os batimentos</li>
+        <li>Cada algoritmo tem características diferentes de eficiência</li>
+        <li>Algoritmos mais eficientes recuperam mais vida do paciente</li>
+        <li>Algoritmos menos eficientes podem prejudicar o paciente</li>
+        <li>Complete 5 níveis para salvar o paciente!</li>
+      </ul>
+      
+      <h3>Sobre os Algoritmos</h3>
+      <ul>
+        <li><strong>Bubble Sort:</strong> Melhor para listas pequenas</li>
+        <li><strong>Insertion Sort:</strong> Bom para listas quase ordenadas</li>
+        <li><strong>Quick Sort:</strong> Geralmente o mais rápido</li>
+        <li><strong>Merge Sort:</strong> Desempenho consistente em todos os casos</li>
+      </ul>
+    </div>
+    <button id="btn-start-tutorial" aria-label="Começar o jogo" type="button">Entendi, Vamos Começar!</button>
+  </div>
+
+  <!-- Tela Dentro do Hospital -->
+  <div id="inside-hospital-screen" role="dialog" aria-modal="true" aria-label="Tela dentro do hospital">
+    <img id="hospital-inside-img" src="https://images.pexels.com/photos/7088525/pexels-photo-7088525.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Interior do hospital"/>
+    <button class="btn-voltar" id="btn-voltar-to-tutorial" type="button" aria-label="Voltar para tela de tutorial">← Voltar</button>
+    <h1>Consultório de Algoritmos</h1>
+    <button id="btn-enter-hospital" aria-label="Entrar no jogo" type="button">Iniciar Tratamento</button>
+  </div>
+
+  <!-- Conteúdo do jogo principal -->
+  <div id="game-main-content" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+    <button class="btn-voltar" id="btn-voltar-to-inside" type="button" aria-label="Voltar para dentro do hospital" style="display:none; position:absolute; top:20px; right:20px;">← Voltar</button>
+    <h1>Coração dos Algoritmos</h1>
+    
+    <div id="score-panel" aria-live="polite" aria-atomic="true">
+      <span>Pontos: <span id="points-display">0</span></span>
+      <span>Tentativas: <span id="attempts-display">3</span></span>
+      <span id="level-indicator">Nível 1</span>
+    </div>
+    
+    <div id="life-bar-container" aria-label="Barra de vida do paciente">
+      <div id="life-bar"></div>
+      <div id="life-bar-pulse"></div>
+    </div>
+    
+    <div id="heart-icon" aria-hidden="true"></div>
+    
+    <div id="buttons-container" role="list" aria-label="Algoritmos de ordenação disponíveis">
+      <button class="algo-btn" id="btn-bubble" role="listitem" aria-describedby="desc-bubble" type="button" data-tooltip="Melhor para listas pequenas ou quase ordenadas">Bubble Sort</button>
+      <button class="algo-btn" id="btn-insertion" role="listitem" aria-describedby="desc-insertion" type="button" data-tooltip="Eficiente para listas pequenas ou quase ordenadas">Insertion Sort</button>
+      <button class="algo-btn" id="btn-quick" role="listitem" aria-describedby="desc-quick" type="button" data-tooltip="Ótimo desempenho na maioria dos casos">Quick Sort</button>
+      <button class="algo-btn" id="btn-merge" role="listitem" aria-describedby="desc-merge" type="button" data-tooltip="Desempenho consistente em todos os casos">Merge Sort</button>
+    </div>
+
+    <div id="info-panel" aria-live="polite" aria-atomic="true">
+      Clique em "START GAME" para começar!
+    </div>
+
+    <div id="message-screen" aria-live="assertive" aria-modal="true" role="dialog" style="display: none;">
+      <div id="message-text"></div>
+      <button id="btn-restart" aria-label="Reiniciar jogo" type="button">Jogar Novamente</button>
+      <button id="btn-tutorial" aria-label="Ver tutorial" type="button" style="margin-top:15px;">Como Jogar</button>
+    </div>
+  </div>
+  
+  <!-- Tooltip flutuante -->
+  <div id="tooltip" class="tooltip"></div>
+  
+  <!-- Modal de tutorial -->
+  <div id="tutorial-modal" class="tutorial-modal">
+    <h2>Como Jogar Coração dos Algoritmos</h2>
+    <p>Você é um médico especialista em algoritmos! Seu paciente está com o coração desordenado e precisa de sua ajuda.</p>
+    <p><strong>Objetivo:</strong> Use os algoritmos de ordenação para normalizar os batimentos cardíacos.</p>
+    <p><strong>Como jogar:</strong></p>
+    <ul>
+      <li>Cada algoritmo tem características diferentes de eficiência</li>
+      <li>Algoritmos mais eficientes recuperam mais vida</li>
+      <li>Algoritmos menos eficientes podem prejudicar o paciente</li>
+      <li>Complete 5 níveis para salvar o paciente!</li>
+    </ul>
+    <p><strong>Dicas:</strong></p>
+    <ul>
+      <li>Bubble Sort: Melhor para listas pequenas</li>
+      <li>Insertion Sort: Bom para listas quase ordenadas</li>
+      <li>Quick Sort: Geralmente o mais rápido</li>
+      <li>Merge Sort: Desempenho consistente</li>
+    </ul>
+    <button id="close-tutorial">Entendi!</button>
+  </div>
+</div>
+
+<script>
+  // Variáveis do jogo
+  let pontos = 0;
+  let tentativas = 3;
+  let vidaMaxima = 100;
+  let vidaAtual = vidaMaxima;
+  let nivel = 1;
+  let emExecucao = false;
+  
+  // Elementos do DOM
+  const lifeBar = document.getElementById('life-bar');
+  const lifeBarPulse = document.getElementById('life-bar-pulse');
+  const infoPanel = document.getElementById('info-panel');
+  const pointsDisplay = document.getElementById('points-display');
+  const attemptsDisplay = document.getElementById('attempts-display');
+  const levelIndicator = document.getElementById('level-indicator');
+  const messageScreen = document.getElementById('message-screen');
+  const messageText = document.getElementById('message-text');
+  const restartButton = document.getElementById('btn-restart');
+  const tutorialButton = document.getElementById('btn-tutorial');
+  const startScreen = document.getElementById('start-screen');
+  const startButton = document.getElementById('btn-start');
+  const tutorialScreen = document.getElementById('tutorial-screen');
+  const startTutorialButton = document.getElementById('btn-start-tutorial');
+  const insideHospitalScreen = document.getElementById('inside-hospital-screen');
+  const enterHospitalButton = document.getElementById('btn-enter-hospital');
+  const btnVoltarToStart = document.getElementById('btn-voltar-to-start');
+  const btnVoltarToTutorial = document.getElementById('btn-voltar-to-tutorial');
+  const btnVoltarToInside = document.getElementById('btn-voltar-to-inside');
+  const gameMainContent = document.getElementById('game-main-content');
+  const tooltip = document.getElementById('tooltip');
+  const tutorialModal = document.getElementById('tutorial-modal');
+  const closeTutorial = document.getElementById('close-tutorial');
+  const bubbleBtn = document.getElementById('btn-bubble');
+  const insertionBtn = document.getElementById('btn-insertion');
+  const quickBtn = document.getElementById('btn-quick');
+  const mergeBtn = document.getElementById('btn-merge');
+
+  // Configurar tooltips
+  function setupTooltips() {
+    const buttons = document.querySelectorAll('[data-tooltip]');
+    
+    buttons.forEach(button => {
+      button.addEventListener('mouseenter', (e) => {
+        const tooltipText = button.getAttribute('data-tooltip');
+        tooltip.textContent = tooltipText;
+        tooltip.style.left = `${e.pageX + 15}px`;
+        tooltip.style.top = `${e.pageY + 15}px`;
+        tooltip.style.opacity = '1';
+      });
+      
+      button.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
+      });
+      
+      button.addEventListener('mousemove', (e) => {
+        tooltip.style.left = `${e.pageX + 15}px`;
+        tooltip.style.top = `${e.pageY + 15}px`;
+      });
+    });
+  }
+
+  // Funções do jogo
+  function atualizarVida() {
+    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima));
+    const porcentagem = (vidaAtual / vidaMaxima) * 100;
+    lifeBar.style.width = porcentagem + '%';
+
+    // Efeito de pulso quando a vida muda
+    lifeBarPulse.style.opacity = '0.5';
+    setTimeout(() => {
+      lifeBarPulse.style.opacity = '0';
+    }, 300);
+
+    // Mudar cor baseada na porcentagem
+    if(porcentagem > 70) {
+      lifeBar.style.background = 'linear-gradient(90deg, #24c6dc, #514a9d)';
+    } else if(porcentagem > 40) {
+      lifeBar.style.background = 'linear-gradient(90deg, #f39c12, #d35400)';
+    } else if(porcentagem > 20) {
+      lifeBar.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+    } else {
+      lifeBar.style.background = 'linear-gradient(90deg, #c0392b, #7b241c)';
+    }
+  }
+
+  function atualizarScore() {
+    pointsDisplay.textContent = pontos;
+    attemptsDisplay.textContent = tentativas;
+    levelIndicator.textContent = `Nível ${nivel}`;
+  }
+
+  function bloquearBotoes(flag) {
+    emExecucao = flag;
+    bubbleBtn.disabled = flag;
+    insertionBtn.disabled = flag;
+    quickBtn.disabled = flag;
+    mergeBtn.disabled = flag;
+  }
+
+  function gerarListaAleatoria(tamanho) {
+    const lista = [];
+    for(let i = 0; i < tamanho; i++) {
+      lista.push(Math.floor(Math.random() * 100) + 1);
+    }
+    return lista;
+  }
+
+  function formatarLista(lista, maxItensPorLinha = 10) {
+    let resultado = '';
+    for (let i = 0; i < lista.length; i++) {
+      if (i > 0 && i % maxItensPorLinha === 0) {
+        resultado += '\n';
+      }
+      resultado += lista[i] + (i < lista.length - 1 ? ', ' : '');
+    }
+    return resultado;
+  }
+
+  // Algoritmos de ordenação
+  function bubbleSort(arr) {
+    let lista = arr.slice();
+    let trocas = 0;
+    for(let i = 0; i < lista.length; i++) {
+      for(let j = 0; j < lista.length - i - 1; j++) {
+        if(lista[j] > lista[j + 1]) {
+          let temp = lista[j];
+          lista[j] = lista[j + 1];
+          lista[j + 1] = temp;
+          trocas++;
+        }
+      }
+    }
+    return { lista: lista, trocas: trocas };
+  }
+
+  function insertionSort(arr) {
+    let lista = arr.slice();
+    let trocas = 0;
+    for(let i = 1; i < lista.length; i++) {
+      let chave = lista[i];
+      let j = i - 1;
+      while(j >= 0 && lista[j] > chave) {
+        lista[j + 1] = lista[j];
+        j--;
+        trocas++;
+      }
+      lista[j + 1] = chave;
+    }
+    return { lista: lista, trocas: trocas };
+  }
+
+  function quickSort(arr) {
+    if(arr.length <= 1) return { lista: arr.slice(), trocas: 0 };
+    
+    let lista = arr.slice();
+    let pivo = lista[0];
+    let menores = [];
+    let maiores = [];
+    let trocas = 0;
+    
+    for(let i = 1; i < lista.length; i++) {
+      if(lista[i] <= pivo) {
+        menores.push(lista[i]);
+      } else {
+        maiores.push(lista[i]);
+      }
+      trocas++;
+    }
+    
+    const menoresOrdenados = quickSort(menores);
+    const maioresOrdenados = quickSort(maiores);
+    
+    return {
+      lista: [...menoresOrdenados.lista, pivo, ...maioresOrdenados.lista],
+      trocas: trocas + menoresOrdenados.trocas + maioresOrdenados.trocas
+    };
+  }
+
+  function mergeSort(arr) {
+    if(arr.length <= 1) return { lista: arr.slice(), trocas: 0 };
+    
+    let meio = Math.floor(arr.length / 2);
+    let esquerda = mergeSort(arr.slice(0, meio));
+    let direita = mergeSort(arr.slice(meio));
+    let resultado = [];
+    let i = 0, j = 0;
+    let trocas = esquerda.trocas + direita.trocas;
+    
+    while(i < esquerda.lista.length && j < direita.lista.length) {
+      if(esquerda.lista[i] < direita.lista[j]) {
+        resultado.push(esquerda.lista[i]);
+        i++;
+      } else {
+        resultado.push(direita.lista[j]);
+        j++;
+      }
+      trocas++;
+    }
+    
+    return {
+      lista: [...resultado, ...esquerda.lista.slice(i), ...direita.lista.slice(j)],
+      trocas: trocas
+    };
+  }
+
+  async function mostrarAnimacaoOrdenacao(nomeAlgoritmo) {
+    return new Promise(resolve => {
+      let etapas = 0;
+      const maxEtapas = 5;
+      const interval = setInterval(() => {
+        infoPanel.textContent += `\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
+        infoPanel.scrollTop = infoPanel.scrollHeight;
+        
+        if(etapas >= maxEtapas) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 300);
+    });
+  }
+
+  // Event Listeners para os botões de ordenação
+  bubbleBtn.addEventListener('click', () => executarAlgoritmo(bubbleSort, "Bubble Sort"));
+  insertionBtn.addEventListener('click', () => executarAlgoritmo(insertionSort, "Insertion Sort"));
+  quickBtn.addEventListener('click', () => executarAlgoritmo(quickSort, "Quick Sort"));
+  mergeBtn.addEventListener('click', () => executarAlgoritmo(mergeSort, "Merge Sort"));
+
+  // Event Listeners para telas e navegação
+  startButton.addEventListener('click', () => {
+    startScreen.style.display = 'none';
+    insideHospitalScreen.style.display = 'flex';
+  });
+
+  btnVoltarToStart.addEventListener('click', () => {
+    insideHospitalScreen.style.display = 'none';
+    startScreen.style.display = 'flex';
+  });
+
+  btnVoltarToTutorial.addEventListener('click', () => {
+    tutorialScreen.style.display = 'none';
+    insideHospitalScreen.style.display = 'flex';
+  });
+
+  btnVoltarToInside.addEventListener('click', () => {
+    gameMainContent.style.display = 'none';
+    insideHospitalScreen.style.display = 'flex';
+    btnVoltarToInside.style.display = 'none';
+    resetarJogo();
+  });
+
+  enterHospitalButton.addEventListener('click', () => {
+    insideHospitalScreen.style.display = 'none';
+    tutorialScreen.style.display = 'flex';
+  });
+
+  startTutorialButton.addEventListener('click', () => {
+    tutorialScreen.style.display = 'none';
+    gameMainContent.style.display = 'flex';
+    btnVoltarToInside.style.display = 'block';
+    iniciarJogo();
+  });
+
+  restartButton.addEventListener('click', () => {
+    messageScreen.style.display = 'none';
+    resetarJogo();
+    iniciarJogo();
+  });
+
+  tutorialButton.addEventListener('click', () => {
+    messageScreen.style.display = 'none';
+    tutorialScreen.style.display = 'flex';
+  });
+
+  closeTutorial.addEventListener('click', () => {
+    tutorialModal.style.display = 'none';
+  });
+
+  // Função para executar um algoritmo de ordenação
+  async function executarAlgoritmo(algoritmo, nomeAlgoritmo) {
+    if (emExecucao) return;
+    
+    bloquearBotoes(true);
+    
+    // Gerar lista aleatória com tamanho baseado no nível
+    const tamanhoLista = 5 + nivel * 2;
+    const listaOriginal = gerarListaAleatoria(tamanhoLista);
+    
+    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaOriginal)}`;
+    infoPanel.classList.add('highlight');
+    setTimeout(() => infoPanel.classList.remove('highlight'), 500);
+    
+    await mostrarAnimacaoOrdenacao(nomeAlgoritmo);
+    
+    const resultado = algoritmo(listaOriginal);
+    const listaOrdenada = resultado.lista;
+    const trocas = resultado.trocas;
+    
+    infoPanel.textContent += `\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}`;
+    infoPanel.textContent += `\n\nTrocas realizadas: ${trocas}`;
+    infoPanel.scrollTop = infoPanel.scrollHeight;
+    
+    // Calcular efeito na vida baseado no algoritmo e trocas
+    let efeitoVida = 0;
+    const trocasIdeais = tamanhoLista * Math.log2(tamanhoLista);
+    
+    switch(nomeAlgoritmo) {
+      case "Bubble Sort":
+        efeitoVida = 15 - (trocas / trocasIdeais * 10);
+        break;
+      case "Insertion Sort":
+        efeitoVida = 20 - (trocas / trocasIdeais * 8);
+        break;
+      case "Quick Sort":
+        efeitoVida = 25 - (trocas / trocasIdeais * 5);
+        break;
+      case "Merge Sort":
+        efeitoVida = 30 - (trocas / trocasIdeais * 3);
+        break;
+    }
+    
+    // Aplicar efeito na vida
+    vidaAtual += efeitoVida;
+    atualizarVida();
+    
+    // Adicionar pontos baseados no desempenho
+    pontos += Math.max(1, Math.floor(efeitoVida * 2));
+    atualizarScore();
+    
+    // Verificar se o paciente morreu
+    if (vidaAtual <= 0) {
+      tentativas--;
+      atualizarScore();
+      
+      if (tentativas <= 0) {
+        fimDeJogo(false);
+      } else {
+        infoPanel.textContent += `\n\nPaciente sofreu um colapso! Tentativas restantes: ${tentativas}`;
+        vidaAtual = vidaMaxima;
+        atualizarVida();
+      }
+    }
+    
+    // Verificar se completou o nível
+    if (vidaAtual >= vidaMaxima * 0.9) {
+      nivel++;
+      
+      if (nivel > 5) {
+        fimDeJogo(true);
+      } else {
+        infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
+        vidaMaxima += 20;
+        vidaAtual = vidaMaxima;
+        atualizarVida();
+        atualizarScore();
+      }
+    }
+    
+    bloquearBotoes(false);
+  }
+
+  function iniciarJogo() {
+    pontos = 0;
+    tentativas = 3;
+    nivel = 1;
+    vidaMaxima = 100;
+    vidaAtual = vidaMaxima;
+    
+    atualizarVida();
+    atualizarScore();
+    
+    infoPanel.textContent = "Paciente chegou com batimentos irregulares!\nSelecione um algoritmo para ordenar os batimentos cardíacos.";
+  }
+
+  function resetarJogo() {
+    pontos = 0;
+    tentativas = 3;
+    nivel = 1;
+    vidaMaxima = 100;
+    vidaAtual = vidaMaxima;
+    
+    atualizarVida();
+    atualizarScore();
+  }
+
+  function fimDeJogo(vitoria) {
+    if (vitoria) {
+      messageText.textContent = "PARABÉNS!\nVocê salvou o paciente!\nTodos os batimentos cardíacos foram normalizados com sucesso.";
+    } else {
+      messageText.textContent = "FIM DE JOGO\nO paciente não resistiu...\nTente novamente com algoritmos mais eficientes!";
+    }
+    
+    messageScreen.style.display = 'flex';
+  }
+
+  // Inicializar tooltips
+  setupTooltips();
+
+  // Inicializar jogo
+  iniciarJogo();
+</script>
+</body>
+</html>
