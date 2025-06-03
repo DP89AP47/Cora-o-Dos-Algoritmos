@@ -549,8 +549,8 @@
   </div>
 
   <!-- Conteúdo do jogo principal -->
-  <div id="game-main-content" style="width:100%; display:flex; flex-direction:column; align-items:center;">
-    <button class="btn-voltar" id="btn-voltar-to-inside" type="button" aria-label="Voltar para dentro do hospital" style="display:none; position:absolute; top:20px; right:20px;">← Voltar</button>
+  <div id="game-main-content" style="width:100%; display:none; flex-direction:column; align-items:center;">
+    <button class="btn-voltar" id="btn-voltar-to-inside" type="button" aria-label="Voltar para dentro do hospital" style="position:absolute; top:20px; right:20px;">← Voltar</button>
     <h1>Coração dos Algoritmos</h1>
     
     <div id="score-panel" aria-live="polite" aria-atomic="true">
@@ -618,6 +618,7 @@
   let vidaAtual = vidaMaxima;
   let nivel = 1;
   let emExecucao = false;
+  let listaAtual = [];
   
   // Elementos do DOM
   const lifeBar = document.getElementById('life-bar');
@@ -821,7 +822,7 @@
       let etapas = 0;
       const maxEtapas = 5;
       const interval = setInterval(() => {
-        infoPanel.textContent += `\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
+        infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
         infoPanel.scrollTop = infoPanel.scrollHeight;
         
         if(etapas >= maxEtapas) {
@@ -845,19 +846,18 @@
   });
 
   btnVoltarToStart.addEventListener('click', () => {
-    insideHospitalScreen.style.display = 'none';
+    tutorialScreen.style.display = 'none';
     startScreen.style.display = 'flex';
   });
 
   btnVoltarToTutorial.addEventListener('click', () => {
-    tutorialScreen.style.display = 'none';
-    insideHospitalScreen.style.display = 'flex';
+    insideHospitalScreen.style.display = 'none';
+    tutorialScreen.style.display = 'flex';
   });
 
   btnVoltarToInside.addEventListener('click', () => {
     gameMainContent.style.display = 'none';
     insideHospitalScreen.style.display = 'flex';
-    btnVoltarToInside.style.display = 'none';
     resetarJogo();
   });
 
@@ -869,7 +869,6 @@
   startTutorialButton.addEventListener('click', () => {
     tutorialScreen.style.display = 'none';
     gameMainContent.style.display = 'flex';
-    btnVoltarToInside.style.display = 'block';
     iniciarJogo();
   });
 
@@ -894,34 +893,25 @@
     
     bloquearBotoes(true);
     
-    // Gerar lista aleatória com tamanho baseado no nível
-    const tamanhoLista = 5 + nivel * 2;
-    const listaOriginal = gerarListaAleatoria(tamanhoLista);
-    
-    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaOriginal)}`;
-    infoPanel.classList.add('highlight');
-    setTimeout(() => infoPanel.classList.remove('highlight'), 500);
-    
     await mostrarAnimacaoOrdenacao(nomeAlgoritmo);
     
-    const resultado = algoritmo(listaOriginal);
+    const resultado = algoritmo(listaAtual);
     const listaOrdenada = resultado.lista;
     const trocas = resultado.trocas;
     
-    infoPanel.textContent += `\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}`;
-    infoPanel.textContent += `\n\nTrocas realizadas: ${trocas}`;
+    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
     infoPanel.scrollTop = infoPanel.scrollHeight;
     
     // Calcular efeito na vida baseado no algoritmo e trocas
     let efeitoVida = 0;
-    const trocasIdeais = tamanhoLista * Math.log2(tamanhoLista);
+    const trocasIdeais = listaAtual.length * Math.log2(listaAtual.length);
     
     switch(nomeAlgoritmo) {
       case "Bubble Sort":
-        efeitoVida = 15 - (trocas / trocasIdeais * 10);
+        efeitoVida = 10 - (trocas / trocasIdeais * 15);
         break;
       case "Insertion Sort":
-        efeitoVida = 20 - (trocas / trocasIdeais * 8);
+        efeitoVida = 15 - (trocas / trocasIdeais * 10);
         break;
       case "Quick Sort":
         efeitoVida = 25 - (trocas / trocasIdeais * 5);
@@ -953,8 +943,8 @@
       }
     }
     
-    // Verificar se completou o nível
-    if (vidaAtual >= vidaMaxima * 0.9) {
+    // Verificar se completou o nível (só com algoritmos eficientes e vida acima de 90%)
+    if (vidaAtual >= vidaMaxima * 0.9 && (nomeAlgoritmo === "Quick Sort" || nomeAlgoritmo === "Merge Sort")) {
       nivel++;
       
       if (nivel > 5) {
@@ -965,6 +955,10 @@
         vidaAtual = vidaMaxima;
         atualizarVida();
         atualizarScore();
+        // Gerar nova lista para o próximo nível
+        const tamanhoLista = 5 + nivel * 2;
+        listaAtual = gerarListaAleatoria(tamanhoLista);
+        infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}`;
       }
     }
     
@@ -978,10 +972,14 @@
     vidaMaxima = 100;
     vidaAtual = vidaMaxima;
     
+    // Gerar primeira lista
+    const tamanhoLista = 5 + nivel * 2;
+    listaAtual = gerarListaAleatoria(tamanhoLista);
+    
     atualizarVida();
     atualizarScore();
     
-    infoPanel.textContent = "Paciente chegou com batimentos irregulares!\nSelecione um algoritmo para ordenar os batimentos cardíacos.";
+    infoPanel.textContent = `Paciente chegou com batimentos irregulares!\nBatimentos atuais:\n${formatarLista(listaAtual)}\n\nSelecione um algoritmo para ordenar os batimentos cardíacos.`;
   }
 
   function resetarJogo() {
@@ -1008,8 +1006,8 @@
   // Inicializar tooltips
   setupTooltips();
 
-  // Inicializar jogo
-  iniciarJogo();
+  // Inicializar jogo (só quando o jogador começar)
+  // iniciarJogo(); - Removido para iniciar apenas quando o jogador clicar
 </script>
 </body>
 </html>
