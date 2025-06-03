@@ -864,6 +864,77 @@
     };
   }
 
+  async function mostrarAnimacaoOrdenacao(nomeAlgoritmo) {
+    return new Promise(resolve => {
+      let etapas = 0;
+      const maxEtapas = 5;
+      const interval = setInterval(() => {
+        infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
+        infoPanel.scrollTop = infoPanel.scrollHeight;
+        
+        if(etapas >= maxEtapas) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 300);
+    });
+  }
+
+  // Event Listeners para os botões de ordenação
+  bubbleBtn.addEventListener('click', () => executarAlgoritmo(bubbleSort, "Bubble Sort"));
+  insertionBtn.addEventListener('click', () => executarAlgoritmo(insertionSort, "Insertion Sort"));
+  quickBtn.addEventListener('click', () => executarAlgoritmo(quickSort, "Quick Sort"));
+  mergeBtn.addEventListener('click', () => executarAlgoritmo(mergeSort, "Merge Sort"));
+
+  // Event Listeners para telas e navegação
+  startButton.addEventListener('click', () => {
+    startScreen.style.display = 'none';
+    insideHospitalScreen.style.display = 'flex';
+  });
+
+  btnVoltarToStart.addEventListener('click', () => {
+    tutorialScreen.style.display = 'none';
+    startScreen.style.display = 'flex';
+  });
+
+  btnVoltarToTutorial.addEventListener('click', () => {
+    insideHospitalScreen.style.display = 'none';
+    tutorialScreen.style.display = 'flex';
+  });
+
+  btnVoltarToInside.addEventListener('click', () => {
+    gameMainContent.style.display = 'none';
+    insideHospitalScreen.style.display = 'flex';
+    resetarJogo();
+  });
+
+  enterHospitalButton.addEventListener('click', () => {
+    insideHospitalScreen.style.display = 'none';
+    tutorialScreen.style.display = 'flex';
+  });
+
+  startTutorialButton.addEventListener('click', () => {
+    tutorialScreen.style.display = 'none';
+    gameMainContent.style.display = 'flex';
+    iniciarJogo();
+  });
+
+  restartButton.addEventListener('click', () => {
+    messageScreen.style.display = 'none';
+    resetarJogo();
+    iniciarJogo();
+  });
+
+  tutorialButton.addEventListener('click', () => {
+    messageScreen.style.display = 'none';
+    tutorialScreen.style.display = 'flex';
+  });
+
+  closeTutorial.addEventListener('click', () => {
+    tutorialModal.style.display = 'none';
+  });
+
+  // Função para executar um algoritmo de ordenação
  async function executarAlgoritmo(algoritmo, nomeAlgoritmo) {
     if (emExecucao) return;
     
@@ -952,146 +1023,6 @@
     
     bloquearBotoes(false);
 }
-
-  // Event Listeners para os botões de ordenação
-  bubbleBtn.addEventListener('click', () => executarAlgoritmo(bubbleSort, "Bubble Sort"));
-  insertionBtn.addEventListener('click', () => executarAlgoritmo(insertionSort, "Insertion Sort"));
-  quickBtn.addEventListener('click', () => executarAlgoritmo(quickSort, "Quick Sort"));
-  mergeBtn.addEventListener('click', () => executarAlgoritmo(mergeSort, "Merge Sort"));
-
-  // Event Listeners para telas e navegação
-  startButton.addEventListener('click', () => {
-    startScreen.style.display = 'none';
-    insideHospitalScreen.style.display = 'flex';
-  });
-
-  btnVoltarToStart.addEventListener('click', () => {
-    tutorialScreen.style.display = 'none';
-    startScreen.style.display = 'flex';
-  });
-
-  btnVoltarToTutorial.addEventListener('click', () => {
-    insideHospitalScreen.style.display = 'none';
-    tutorialScreen.style.display = 'flex';
-  });
-
-  btnVoltarToInside.addEventListener('click', () => {
-    gameMainContent.style.display = 'none';
-    insideHospitalScreen.style.display = 'flex';
-    resetarJogo();
-  });
-
-  enterHospitalButton.addEventListener('click', () => {
-    insideHospitalScreen.style.display = 'none';
-    tutorialScreen.style.display = 'flex';
-  });
-
-  startTutorialButton.addEventListener('click', () => {
-    tutorialScreen.style.display = 'none';
-    gameMainContent.style.display = 'flex';
-    iniciarJogo();
-  });
-
-  restartButton.addEventListener('click', () => {
-    messageScreen.style.display = 'none';
-    resetarJogo();
-    iniciarJogo();
-  });
-
-  tutorialButton.addEventListener('click', () => {
-    messageScreen.style.display = 'none';
-    tutorialScreen.style.display = 'flex';
-  });
-
-  closeTutorial.addEventListener('click', () => {
-    tutorialModal.style.display = 'none';
-  });
-
-  // Função para executar um algoritmo de ordenação
-  async function executarAlgoritmo(algoritmo, nomeAlgoritmo) {
-    if (emExecucao) return;
-    
-    bloquearBotoes(true);
-    
-    await mostrarAnimacaoOrdenacao(nomeAlgoritmo);
-    
-    const resultado = algoritmo(listaAtual);
-    const listaOrdenada = resultado.lista;
-    const trocas = resultado.trocas;
-    
-    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
-    infoPanel.scrollTop = infoPanel.scrollHeight;
-    
-    // Calcular efeito na vida baseado no algoritmo usado
-    let efeitoVida = 0;
-    
-    if (nomeAlgoritmo === algoritmoEficaz) {
-      // Algoritmo eficaz - perde menos vida
-      efeitoVida = -(vidaMaxima / (tentativas + 2)); // Perda menor
-      pontos += 10; // Pontos por usar o algoritmo correto
-    } else {
-      // Outros algoritmos - perde mais vida
-      efeitoVida = -(vidaMaxima / (tentativas)); // Perda maior
-    }
-    
-    // Aplicar efeito na vida
-    vidaAtual += efeitoVida;
-    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima));
-    atualizarVida();
-    atualizarScore();
-    
-    // Verificar se o paciente morreu
-    if (vidaAtual <= 0) {
-      tentativas--;
-      atualizarScore();
-      
-      if (tentativas <= 0) {
-        fimDeJogo(false);
-      } else {
-        infoPanel.textContent += `\n\nPaciente sofreu um colapso! Tentativas restantes: ${tentativas}`;
-      }
-    }
-    
-    // Verificar se completou o nível (lista ordenada)
-    if (listaOrdenada.every((val, i, arr) => !i || val >= arr[i-1])) {
-      // Animação de level up
-      levelIndicator.classList.add('level-up');
-      document.getElementById('heart-icon').classList.add('heartbeat');
-      criarConfetes();
-      
-      setTimeout(() => {
-        levelIndicator.classList.remove('level-up');
-        document.getElementById('heart-icon').classList.remove('heartbeat');
-        
-        nivel++;
-        
-        if (nivel > 5) {
-          // Vitória - recupera vida totalmente
-          vidaAtual = vidaMaxima;
-          atualizarVida();
-          fimDeJogo(true);
-        } else {
-          infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
-          
-          // Escolher novo algoritmo eficaz aleatório
-          algoritmoEficaz = algoritmos[Math.floor(Math.random() * algoritmos.length)];
-          
-          // Aumentar dificuldade
-          vidaMaxima += 20;
-          atualizarVida();
-          atualizarScore();
-          
-          // Gerar nova lista
-          const tamanhoLista = 5 + nivel * 2;
-          listaAtual = gerarListaAleatoria(tamanhoLista);
-          infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}`;
-        }
-      }, 1500);
-    }
-    
-    bloquearBotoes(false);
-  }
-
   function iniciarJogo() {
     pontos = 0;
     tentativas = 3;
