@@ -56,7 +56,7 @@
   #life-bar {
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, #24c6dc, #514a9d);
+    background: linear-gradient(90deg, #4CAF50, #2E7D32);
     transition: width 0.5s ease;
     position: relative;
     z-index: 2;
@@ -549,18 +549,17 @@
       <ul>
         <li>Você verá uma lista de números representando os batimentos cardíacos</li>
         <li>Escolha um algoritmo de ordenação para organizar os batimentos</li>
-        <li>Cada algoritmo tem características diferentes de eficiência</li>
-        <li>Algoritmos mais eficientes recuperam mais vida do paciente</li>
-        <li>Algoritmos menos eficientes podem prejudicar o paciente</li>
+        <li>Cada nível tem um algoritmo mais eficaz (será indicado)</li>
+        <li>Algoritmos menos eficientes prejudicam o paciente</li>
         <li>Complete 5 níveis para salvar o paciente!</li>
       </ul>
       
       <h3>Sobre os Algoritmos</h3>
       <ul>
-        <li><strong>Bubble Sort:</strong> Melhor para listas pequenas</li>
-        <li><strong>Insertion Sort:</strong> Bom para listas quase ordenadas</li>
-        <li><strong>Quick Sort:</strong> Geralmente o mais rápido</li>
-        <li><strong>Merge Sort:</strong> Desempenho consistente em todos os casos</li>
+        <li><strong>Bubble Sort:</strong> Simples mas ineficiente</li>
+        <li><strong>Insertion Sort:</strong> Bom para listas pequenas</li>
+        <li><strong>Quick Sort:</strong> Geralmente eficiente</li>
+        <li><strong>Merge Sort:</strong> Desempenho consistente</li>
       </ul>
     </div>
     <button id="btn-start-tutorial" aria-label="Começar o jogo" type="button">Entendi, Vamos Começar!</button>
@@ -593,10 +592,10 @@
     <div id="heart-icon" aria-hidden="true"></div>
     
     <div id="buttons-container" role="list" aria-label="Algoritmos de ordenação disponíveis">
-      <button class="algo-btn" id="btn-bubble" role="listitem" aria-describedby="desc-bubble" type="button" data-tooltip="Melhor para listas pequenas ou quase ordenadas">Bubble Sort</button>
-      <button class="algo-btn" id="btn-insertion" role="listitem" aria-describedby="desc-insertion" type="button" data-tooltip="Eficiente para listas pequenas ou quase ordenadas">Insertion Sort</button>
-      <button class="algo-btn" id="btn-quick" role="listitem" aria-describedby="desc-quick" type="button" data-tooltip="Ótimo desempenho na maioria dos casos">Quick Sort</button>
-      <button class="algo-btn" id="btn-merge" role="listitem" aria-describedby="desc-merge" type="button" data-tooltip="Desempenho consistente em todos os casos">Merge Sort</button>
+      <button class="algo-btn" id="btn-bubble" role="listitem" aria-describedby="desc-bubble" type="button" data-tooltip="Simples mas ineficiente">Bubble Sort</button>
+      <button class="algo-btn" id="btn-insertion" role="listitem" aria-describedby="desc-insertion" type="button" data-tooltip="Bom para listas pequenas">Insertion Sort</button>
+      <button class="algo-btn" id="btn-quick" role="listitem" aria-describedby="desc-quick" type="button" data-tooltip="Geralmente eficiente">Quick Sort</button>
+      <button class="algo-btn" id="btn-merge" role="listitem" aria-describedby="desc-merge" type="button" data-tooltip="Desempenho consistente">Merge Sort</button>
     </div>
 
     <div id="info-panel" aria-live="polite" aria-atomic="true">
@@ -620,17 +619,9 @@
     <p><strong>Objetivo:</strong> Use os algoritmos de ordenação para normalizar os batimentos cardíacos.</p>
     <p><strong>Como jogar:</strong></p>
     <ul>
-      <li>Cada algoritmo tem características diferentes de eficiência</li>
-      <li>Algoritmos mais eficientes recuperam mais vida</li>
-      <li>Algoritmos menos eficientes podem prejudicar o paciente</li>
+      <li>Cada nível tem um algoritmo mais eficaz</li>
+      <li>Algoritmos menos eficientes prejudicam o paciente</li>
       <li>Complete 5 níveis para salvar o paciente!</li>
-    </ul>
-    <p><strong>Dicas:</strong></p>
-    <ul>
-      <li>Bubble Sort: Melhor para listas pequenas</li>
-      <li>Insertion Sort: Bom para listas quase ordenadas</li>
-      <li>Quick Sort: Geralmente o mais rápido</li>
-      <li>Merge Sort: Desempenho consistente</li>
     </ul>
     <button id="close-tutorial">Entendi!</button>
   </div>
@@ -645,6 +636,8 @@
   let nivel = 1;
   let emExecucao = false;
   let listaAtual = [];
+  const algoritmos = ["Bubble Sort", "Insertion Sort", "Quick Sort", "Merge Sort"];
+  let algoritmoEficaz = "";
   
   // Elementos do DOM
   const lifeBar = document.getElementById('life-bar');
@@ -741,13 +734,13 @@
 
     // Mudar cor baseada na porcentagem
     if(porcentagem > 70) {
-      lifeBar.style.background = 'linear-gradient(90deg, #24c6dc, #514a9d)';
+      lifeBar.style.background = 'linear-gradient(90deg, #4CAF50, #2E7D32)';
     } else if(porcentagem > 40) {
-      lifeBar.style.background = 'linear-gradient(90deg, #f39c12, #d35400)';
+      lifeBar.style.background = 'linear-gradient(90deg, #8BC34A, #689F38)';
     } else if(porcentagem > 20) {
-      lifeBar.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
+      lifeBar.style.background = 'linear-gradient(90deg, #CDDC39, #AFB42B)';
     } else {
-      lifeBar.style.background = 'linear-gradient(90deg, #c0392b, #7b241c)';
+      lifeBar.style.background = 'linear-gradient(90deg, #FFC107, #FFA000)';
     }
   }
 
@@ -871,21 +864,94 @@
     };
   }
 
-  async function mostrarAnimacaoOrdenacao(nomeAlgoritmo) {
-    return new Promise(resolve => {
-      let etapas = 0;
-      const maxEtapas = 5;
-      const interval = setInterval(() => {
-        infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
-        infoPanel.scrollTop = infoPanel.scrollHeight;
+ async function executarAlgoritmo(algoritmo, nomeAlgoritmo) {
+    if (emExecucao) return;
+    
+    bloquearBotoes(true);
+    
+    await mostrarAnimacaoOrdenacao(nomeAlgoritmo);
+    
+    const resultado = algoritmo(listaAtual);
+    const listaOrdenada = resultado.lista;
+    const trocas = resultado.trocas;
+    
+    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
+    infoPanel.scrollTop = infoPanel.scrollHeight;
+    
+    // Verificar se a lista está ordenada
+    const estaOrdenada = listaOrdenada.every((val, i, arr) => !i || val >= arr[i-1]);
+    
+    // Calcular efeito na vida baseado no algoritmo usado
+    let efeitoVida = 0;
+    
+    if (nomeAlgoritmo === algoritmoEficaz) {
+        // Algoritmo eficaz - perde menos vida
+        efeitoVida = -(vidaMaxima / (tentativas + 2)); // Perda menor
+        pontos += 10; // Pontos por usar o algoritmo correto
+    } else {
+        // Outros algoritmos - perde mais vida
+        efeitoVida = -(vidaMaxima / tentativas); // Perda maior
+    }
+    
+    // Aplicar efeito na vida
+    vidaAtual += efeitoVida;
+    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima));
+    atualizarVida();
+    atualizarScore();
+    
+    // Verificar se o paciente morreu
+    if (vidaAtual <= 0) {
+        tentativas--;
+        atualizarScore();
         
-        if(etapas >= maxEtapas) {
-          clearInterval(interval);
-          resolve();
+        if (tentativas <= 0) {
+            fimDeJogo(false);
+            bloquearBotoes(false);
+            return;
+        } else {
+            infoPanel.textContent += `\n\nPaciente sofreu um colapso! Tentativas restantes: ${tentativas}`;
         }
-      }, 300);
-    });
-  }
+    }
+    
+    // Só passa de nível se a lista estiver ordenada
+    if (estaOrdenada) {
+        // Animação de level up
+        levelIndicator.classList.add('level-up');
+        document.getElementById('heart-icon').classList.add('heartbeat');
+        criarConfetes();
+        
+        setTimeout(() => {
+            levelIndicator.classList.remove('level-up');
+            document.getElementById('heart-icon').classList.remove('heartbeat');
+            
+            nivel++;
+            
+            if (nivel > 5) {
+                // Vitória - recupera vida totalmente
+                vidaAtual = vidaMaxima;
+                atualizarVida();
+                fimDeJogo(true);
+            } else {
+                infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
+                
+                // Escolher novo algoritmo eficaz aleatório
+                algoritmoEficaz = algoritmos[Math.floor(Math.random() * algoritmos.length)];
+                
+                // Aumentar dificuldade
+                vidaMaxima += 20;
+                atualizarVida();
+                atualizarScore();
+                
+                // Gerar nova lista
+                const tamanhoLista = 5 + nivel * 2;
+                listaAtual = gerarListaAleatoria(tamanhoLista);
+                infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}`;
+            }
+        }, 1500);
+    }
+    
+    bloquearBotoes(false);
+}
 
   // Event Listeners para os botões de ordenação
   bubbleBtn.addEventListener('click', () => executarAlgoritmo(bubbleSort, "Bubble Sort"));
@@ -953,50 +1019,41 @@
     const listaOrdenada = resultado.lista;
     const trocas = resultado.trocas;
     
-    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
+    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
     infoPanel.scrollTop = infoPanel.scrollHeight;
     
-    // Calcular efeito na vida baseado no algoritmo e trocas
+    // Calcular efeito na vida baseado no algoritmo usado
     let efeitoVida = 0;
-    const trocasIdeais = listaAtual.length * Math.log2(listaAtual.length);
     
-    switch(nomeAlgoritmo) {
-      case "Bubble Sort":
-        efeitoVida = -15 - (trocas / trocasIdeais * 5); // Efeito negativo
-        tentativas--; // Perde tentativa
-        break;
-      case "Insertion Sort":
-        efeitoVida = -10 - (trocas / trocasIdeais * 3); // Efeito negativo
-        tentativas--; // Perde tentativa
-        break;
-      case "Quick Sort":
-        efeitoVida = 25 - (trocas / trocasIdeais * 5);
-        break;
-      case "Merge Sort":
-        efeitoVida = 30 - (trocas / trocasIdeais * 3);
-        break;
+    if (nomeAlgoritmo === algoritmoEficaz) {
+      // Algoritmo eficaz - perde menos vida
+      efeitoVida = -(vidaMaxima / (tentativas + 2)); // Perda menor
+      pontos += 10; // Pontos por usar o algoritmo correto
+    } else {
+      // Outros algoritmos - perde mais vida
+      efeitoVida = -(vidaMaxima / (tentativas)); // Perda maior
     }
     
     // Aplicar efeito na vida
     vidaAtual += efeitoVida;
-    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima)); // Garantir que fique entre 0 e vidaMaxima
+    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima));
     atualizarVida();
-    
-    // Adicionar pontos apenas se for positivo
-    if (efeitoVida > 0) {
-      pontos += Math.max(1, Math.floor(efeitoVida * 2));
-      atualizarScore();
-    }
+    atualizarScore();
     
     // Verificar se o paciente morreu
-    if (vidaAtual <= 0 || tentativas <= 0) {
-      fimDeJogo(false);
-      bloquearBotoes(false);
-      return;
+    if (vidaAtual <= 0) {
+      tentativas--;
+      atualizarScore();
+      
+      if (tentativas <= 0) {
+        fimDeJogo(false);
+      } else {
+        infoPanel.textContent += `\n\nPaciente sofreu um colapso! Tentativas restantes: ${tentativas}`;
+      }
     }
     
-    // Verificar se completou o nível (só com algoritmos eficientes e vida acima de 90%)
-    if (vidaAtual >= vidaMaxima * 0.9 && (nomeAlgoritmo === "Quick Sort" || nomeAlgoritmo === "Merge Sort")) {
+    // Verificar se completou o nível (lista ordenada)
+    if (listaOrdenada.every((val, i, arr) => !i || val >= arr[i-1])) {
       // Animação de level up
       levelIndicator.classList.add('level-up');
       document.getElementById('heart-icon').classList.add('heartbeat');
@@ -1009,18 +1066,25 @@
         nivel++;
         
         if (nivel > 5) {
+          // Vitória - recupera vida totalmente
+          vidaAtual = vidaMaxima;
+          atualizarVida();
           fimDeJogo(true);
         } else {
           infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
+          
+          // Escolher novo algoritmo eficaz aleatório
+          algoritmoEficaz = algoritmos[Math.floor(Math.random() * algoritmos.length)];
+          
+          // Aumentar dificuldade
           vidaMaxima += 20;
-          vidaAtual = vidaMaxima;
           atualizarVida();
           atualizarScore();
           
-          // Gerar nova lista para o próximo nível
+          // Gerar nova lista
           const tamanhoLista = 5 + nivel * 2;
           listaAtual = gerarListaAleatoria(tamanhoLista);
-          infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}`;
+          infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}`;
         }
       }, 1500);
     }
@@ -1035,6 +1099,9 @@
     vidaMaxima = 100;
     vidaAtual = vidaMaxima;
     
+    // Escolher algoritmo eficaz aleatório
+    algoritmoEficaz = algoritmos[Math.floor(Math.random() * algoritmos.length)];
+    
     // Gerar primeira lista
     const tamanhoLista = 5 + nivel * 2;
     listaAtual = gerarListaAleatoria(tamanhoLista);
@@ -1042,7 +1109,7 @@
     atualizarVida();
     atualizarScore();
     
-    infoPanel.textContent = `Paciente chegou com batimentos irregulares!\nBatimentos atuais:\n${formatarLista(listaAtual)}\n\nSelecione um algoritmo para ordenar os batimentos cardíacos.`;
+    infoPanel.textContent = `Paciente chegou com batimentos irregulares!\nBatimentos atuais:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nSelecione um algoritmo para ordenar os batimentos cardíacos.`;
   }
 
   function resetarJogo() {
