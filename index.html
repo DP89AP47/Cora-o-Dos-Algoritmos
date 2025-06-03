@@ -935,7 +935,7 @@
   });
 
   // Função para executar um algoritmo de ordenação
- async function executarAlgoritmo(algoritmo, nomeAlgoritmo) {
+  async function executarAlgoritmo(algoritmo, nomeAlgoritmo) {
     if (emExecucao) return;
     
     bloquearBotoes(true);
@@ -949,43 +949,14 @@
     infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
     infoPanel.scrollTop = infoPanel.scrollHeight;
     
-    // Verificar se a lista está ordenada
-    const estaOrdenada = listaOrdenada.every((val, i, arr) => !i || val >= arr[i-1]);
+    // Verificar se o algoritmo usado foi o eficaz
+    const acertouAlgoritmo = (nomeAlgoritmo === algoritmoEficaz);
     
-    // Calcular efeito na vida baseado no algoritmo usado
-    let efeitoVida = 0;
-    
-    if (nomeAlgoritmo === algoritmoEficaz) {
-        // Algoritmo eficaz - perde menos vida
-        efeitoVida = -(vidaMaxima / (tentativas + 2)); // Perda menor
-        pontos += 10; // Pontos por usar o algoritmo correto
-    } else {
-        // Outros algoritmos - perde mais vida
-        efeitoVida = -(vidaMaxima / tentativas); // Perda maior
-    }
-    
-    // Aplicar efeito na vida
-    vidaAtual += efeitoVida;
-    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima));
-    atualizarVida();
-    atualizarScore();
-    
-    // Verificar se o paciente morreu
-    if (vidaAtual <= 0) {
-        tentativas--;
+    if (acertouAlgoritmo) {
+        // Se acertou o algoritmo, passa de nível
+        pontos += 10;
         atualizarScore();
         
-        if (tentativas <= 0) {
-            fimDeJogo(false);
-            bloquearBotoes(false);
-            return;
-        } else {
-            infoPanel.textContent += `\n\nPaciente sofreu um colapso! Tentativas restantes: ${tentativas}`;
-        }
-    }
-    
-    // Só passa de nível se a lista estiver ordenada
-    if (estaOrdenada) {
         // Animação de level up
         levelIndicator.classList.add('level-up');
         document.getElementById('heart-icon').classList.add('heartbeat');
@@ -998,9 +969,7 @@
             nivel++;
             
             if (nivel > 5) {
-                // Vitória - recupera vida totalmente
-                vidaAtual = vidaMaxima;
-                atualizarVida();
+                // Vitória
                 fimDeJogo(true);
             } else {
                 infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
@@ -1019,10 +988,23 @@
                 infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}`;
             }
         }, 1500);
+    } else {
+        // Se errou o algoritmo, perde tentativa e vida
+        tentativas--;
+        vidaAtual = Math.max(0, vidaAtual - (vidaMaxima / 3)); // Perde 1/3 da vida
+        atualizarVida();
+        atualizarScore();
+        
+        if (tentativas <= 0) {
+            fimDeJogo(false);
+        } else {
+            infoPanel.textContent += `\n\nAlgoritmo incorreto! O paciente piorou. Tentativas restantes: ${tentativas}`;
+        }
     }
     
     bloquearBotoes(false);
-}
+  }
+
   function iniciarJogo() {
     pontos = 0;
     tentativas = 3;
