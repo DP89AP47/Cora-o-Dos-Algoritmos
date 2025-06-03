@@ -409,6 +409,32 @@
     font-family: 'Press Start 2P', cursive;
     font-size: 0.7rem;
   }
+  /* Novos estilos para animações */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .level-up {
+    animation: pulse 0.5s 3;
+    color: #ffeb3b;
+    text-shadow: 0 0 10px #ffeb3b;
+  }
+  
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #f00;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 100;
+  }
+  
+  .heartbeat {
+    animation: heartbeat 0.5s 3;
+  }
   /* Responsivo */
   @media(max-width: 768px) {
     #game-container {
@@ -673,6 +699,34 @@
     });
   }
 
+  // Função para criar confetes
+  function criarConfetes() {
+    const container = document.getElementById('game-container');
+    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+    
+    for (let i = 0; i < 50; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + 'vw';
+      confetti.style.top = -10 + 'px';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.width = Math.random() * 10 + 5 + 'px';
+      confetti.style.height = confetti.style.width;
+      container.appendChild(confetti);
+      
+      // Animação dos confetes
+      const animation = confetti.animate([
+        { top: '-10px', opacity: 1, transform: 'rotate(0deg)' },
+        { top: '100vh', opacity: 0, transform: 'rotate(360deg)' }
+      ], {
+        duration: Math.random() * 3000 + 2000,
+        easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+      });
+      
+      animation.onfinish = () => confetti.remove();
+    }
+  }
+
   // Funções do jogo
   function atualizarVida() {
     vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima));
@@ -908,10 +962,12 @@
     
     switch(nomeAlgoritmo) {
       case "Bubble Sort":
-        efeitoVida = 10 - (trocas / trocasIdeais * 15);
+        efeitoVida = -15 - (trocas / trocasIdeais * 5); // Efeito negativo
+        tentativas--; // Perde tentativa
         break;
       case "Insertion Sort":
-        efeitoVida = 15 - (trocas / trocasIdeais * 10);
+        efeitoVida = -10 - (trocas / trocasIdeais * 3); // Efeito negativo
+        tentativas--; // Perde tentativa
         break;
       case "Quick Sort":
         efeitoVida = 25 - (trocas / trocasIdeais * 5);
@@ -923,43 +979,50 @@
     
     // Aplicar efeito na vida
     vidaAtual += efeitoVida;
+    vidaAtual = Math.max(0, Math.min(vidaAtual, vidaMaxima)); // Garantir que fique entre 0 e vidaMaxima
     atualizarVida();
     
-    // Adicionar pontos baseados no desempenho
-    pontos += Math.max(1, Math.floor(efeitoVida * 2));
-    atualizarScore();
+    // Adicionar pontos apenas se for positivo
+    if (efeitoVida > 0) {
+      pontos += Math.max(1, Math.floor(efeitoVida * 2));
+      atualizarScore();
+    }
     
     // Verificar se o paciente morreu
-    if (vidaAtual <= 0) {
-      tentativas--;
-      atualizarScore();
-      
-      if (tentativas <= 0) {
-        fimDeJogo(false);
-      } else {
-        infoPanel.textContent += `\n\nPaciente sofreu um colapso! Tentativas restantes: ${tentativas}`;
-        vidaAtual = vidaMaxima;
-        atualizarVida();
-      }
+    if (vidaAtual <= 0 || tentativas <= 0) {
+      fimDeJogo(false);
+      bloquearBotoes(false);
+      return;
     }
     
     // Verificar se completou o nível (só com algoritmos eficientes e vida acima de 90%)
     if (vidaAtual >= vidaMaxima * 0.9 && (nomeAlgoritmo === "Quick Sort" || nomeAlgoritmo === "Merge Sort")) {
-      nivel++;
+      // Animação de level up
+      levelIndicator.classList.add('level-up');
+      document.getElementById('heart-icon').classList.add('heartbeat');
+      criarConfetes();
       
-      if (nivel > 5) {
-        fimDeJogo(true);
-      } else {
-        infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
-        vidaMaxima += 20;
-        vidaAtual = vidaMaxima;
-        atualizarVida();
-        atualizarScore();
-        // Gerar nova lista para o próximo nível
-        const tamanhoLista = 5 + nivel * 2;
-        listaAtual = gerarListaAleatoria(tamanhoLista);
-        infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}`;
-      }
+      setTimeout(() => {
+        levelIndicator.classList.remove('level-up');
+        document.getElementById('heart-icon').classList.remove('heartbeat');
+        
+        nivel++;
+        
+        if (nivel > 5) {
+          fimDeJogo(true);
+        } else {
+          infoPanel.textContent += `\n\nNível ${nivel} alcançado!`;
+          vidaMaxima += 20;
+          vidaAtual = vidaMaxima;
+          atualizarVida();
+          atualizarScore();
+          
+          // Gerar nova lista para o próximo nível
+          const tamanhoLista = 5 + nivel * 2;
+          listaAtual = gerarListaAleatoria(tamanhoLista);
+          infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}`;
+        }
+      }, 1500);
     }
     
     bloquearBotoes(false);
@@ -1005,9 +1068,6 @@
 
   // Inicializar tooltips
   setupTooltips();
-
-  // Inicializar jogo (só quando o jogador começar)
-  // iniciarJogo(); - Removido para iniciar apenas quando o jogador clicar
 </script>
 </body>
 </html>
