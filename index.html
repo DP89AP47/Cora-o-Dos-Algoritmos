@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
@@ -531,7 +531,7 @@
   <div id="start-screen" role="dialog" aria-modal="true" aria-label="Tela inicial do jogo">
     <img id="start-hospital-img" src="https://images.pexels.com/photos/263402/pexels-photo-263402.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" alt="Hospital"/>
     <h1>Bem-vindo ao Coração dos Algoritmos</h1>
-    <button id="btn-start" aria-label="Iniciar o jogo" type="button">START GAME</button>
+    <button id="btn-start" aria-label="Iniciar o jogo" type="button">COMEÇAR JOGO</button>
   </div>
 
   <!-- Tela de Tutorial -->
@@ -540,18 +540,18 @@
     <button class="btn-voltar" id="btn-voltar-to-start" type="button" aria-label="Voltar para tela inicial">← Voltar</button>
     <div class="tutorial-content">
       <h2>Como Jogar</h2>
-      <p>Você é um médico especialista em algoritmos! Seu paciente está com o coração desordenado e precisa de sua ajuda.</p>
+      <p>És um médico especialista em algoritmos! O teu paciente está com o coração desordenado e precisa da tua ajuda.</p>
       
       <h3>Objetivo do Jogo</h3>
-      <p>Use os algoritmos de ordenação para normalizar os batimentos cardíacos do paciente.</p>
+      <p>Usa os algoritmos de ordenação para normalizar os batimentos cardíacos do paciente.</p>
       
       <h3>Como Jogar</h3>
       <ul>
-        <li>Você verá uma lista de números representando os batimentos cardíacos</li>
-        <li>Escolha um algoritmo de ordenação para organizar os batimentos</li>
-        <li>Cada nível tem um algoritmo mais eficaz (será indicado)</li>
+        <li>Verás uma lista de números representando os batimentos cardíacos</li>
+        <li>Escolhe um algoritmo de ordenação para organizar os batimentos</li>
+        <li>Cada nível tem um algoritmo mais eficaz (terás de descobrir qual é)</li>
         <li>Algoritmos menos eficientes prejudicam o paciente</li>
-        <li>Complete 5 níveis para salvar o paciente!</li>
+        <li>Completa 5 níveis para salvar o paciente!</li>
       </ul>
       
       <h3>Sobre os Algoritmos</h3>
@@ -562,7 +562,7 @@
         <li><strong>Merge Sort:</strong> Desempenho consistente</li>
       </ul>
     </div>
-    <button id="btn-start-tutorial" aria-label="Começar o jogo" type="button">Entendi, Vamos Começar!</button>
+    <button id="btn-start-tutorial" aria-label="Começar o jogo" type="button">Percebi, Vamos Começar!</button>
   </div>
 
   <!-- Tela Dentro do Hospital -->
@@ -599,12 +599,12 @@
     </div>
 
     <div id="info-panel" aria-live="polite" aria-atomic="true">
-      Clique em "START GAME" para começar!
+      Clica em "COMEÇAR JOGO" para começar!
     </div>
 
     <div id="message-screen" aria-live="assertive" aria-modal="true" role="dialog" style="display: none;">
       <div id="message-text"></div>
-      <button id="btn-restart" aria-label="Reiniciar jogo" type="button">Jogar Novamente</button>
+      <button id="btn-restart" aria-label="Reiniciar jogo" type="button">Jogar Outra Vez</button>
       <button id="btn-tutorial" aria-label="Ver tutorial" type="button" style="margin-top:15px;">Como Jogar</button>
     </div>
   </div>
@@ -615,15 +615,15 @@
   <!-- Modal de tutorial -->
   <div id="tutorial-modal" class="tutorial-modal">
     <h2>Como Jogar Coração dos Algoritmos</h2>
-    <p>Você é um médico especialista em algoritmos! Seu paciente está com o coração desordenado e precisa de sua ajuda.</p>
-    <p><strong>Objetivo:</strong> Use os algoritmos de ordenação para normalizar os batimentos cardíacos.</p>
+    <p>És um médico especialista em algoritmos! O teu paciente está com o coração desordenado e precisa da tua ajuda.</p>
+    <p><strong>Objetivo:</strong> Usa os algoritmos de ordenação para normalizar os batimentos cardíacos.</p>
     <p><strong>Como jogar:</strong></p>
     <ul>
-      <li>Cada nível tem um algoritmo mais eficaz</li>
+      <li>Cada nível tem um algoritmo mais eficaz (descobre qual é)</li>
       <li>Algoritmos menos eficientes prejudicam o paciente</li>
-      <li>Complete 5 níveis para salvar o paciente!</li>
+      <li>Completa 5 níveis para salvar o paciente!</li>
     </ul>
-    <button id="close-tutorial">Entendi!</button>
+    <button id="close-tutorial">Percebi!</button>
   </div>
 </div>
 
@@ -869,7 +869,7 @@
       let etapas = 0;
       const maxEtapas = 5;
       const interval = setInterval(() => {
-        infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
+        infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\n${nomeAlgoritmo} em progresso... ${++etapas}/${maxEtapas}`;
         infoPanel.scrollTop = infoPanel.scrollHeight;
         
         if(etapas >= maxEtapas) {
@@ -946,7 +946,7 @@
     const listaOrdenada = resultado.lista;
     const trocas = resultado.trocas;
     
-    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
+    infoPanel.textContent = `Batimentos cardíacos desordenados:\n${formatarLista(listaAtual)}\n\nBatimentos após ${nomeAlgoritmo}:\n${formatarLista(listaOrdenada)}\n\nTrocas realizadas: ${trocas}`;
     infoPanel.scrollTop = infoPanel.scrollHeight;
     
     // Verificar se o algoritmo usado foi o eficaz
@@ -977,21 +977,16 @@
                 // Escolher novo algoritmo eficaz aleatório
                 algoritmoEficaz = algoritmos[Math.floor(Math.random() * algoritmos.length)];
                 
-                // Aumentar dificuldade
-                vidaMaxima += 20;
-                atualizarVida();
-                atualizarScore();
-                
-                // Gerar nova lista
+                // Gerar nova lista com números diferentes (dificuldade aumenta)
                 const tamanhoLista = 5 + nivel * 2;
                 listaAtual = gerarListaAleatoria(tamanhoLista);
-                infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}`;
+                infoPanel.textContent += `\n\nNovos batimentos desordenados:\n${formatarLista(listaAtual)}`;
             }
         }, 1500);
     } else {
         // Se errou o algoritmo, perde tentativa e vida
         tentativas--;
-        vidaAtual = Math.max(0, vidaAtual - (vidaMaxima / 3)); // Perde 1/3 da vida
+        vidaAtual = Math.max(0, vidaAtual - (vidaMaxima / 3));
         atualizarVida();
         atualizarScore();
         
@@ -1012,7 +1007,7 @@
     vidaMaxima = 100;
     vidaAtual = vidaMaxima;
     
-    // Escolher algoritmo eficaz aleatório
+    // Escolher algoritmo eficaz aleatório (mas não mostrar ao jogador)
     algoritmoEficaz = algoritmos[Math.floor(Math.random() * algoritmos.length)];
     
     // Gerar primeira lista
@@ -1022,7 +1017,7 @@
     atualizarVida();
     atualizarScore();
     
-    infoPanel.textContent = `Paciente chegou com batimentos irregulares!\nBatimentos atuais:\n${formatarLista(listaAtual)}\n\nAlgoritmo recomendado: ${algoritmoEficaz}\n\nSelecione um algoritmo para ordenar os batimentos cardíacos.`;
+    infoPanel.textContent = `Paciente chegou com batimentos irregulares!\nBatimentos atuais:\n${formatarLista(listaAtual)}\n\nSeleciona um algoritmo para ordenar os batimentos cardíacos.`;
   }
 
   function resetarJogo() {
@@ -1038,9 +1033,9 @@
 
   function fimDeJogo(vitoria) {
     if (vitoria) {
-      messageText.textContent = "PARABÉNS!\nVocê salvou o paciente!\nTodos os batimentos cardíacos foram normalizados com sucesso.";
+      messageText.textContent = "PARABÉNS!\nSalvaste o paciente!\nTodos os batimentos cardíacos foram normalizados com sucesso.";
     } else {
-      messageText.textContent = "FIM DE JOGO\nO paciente não resistiu...\nTente novamente com algoritmos mais eficientes!";
+      messageText.textContent = "FIM DE JOGO\nO paciente não resistiu...\nTenta outra vez com algoritmos mais eficientes!";
     }
     
     messageScreen.style.display = 'flex';
